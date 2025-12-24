@@ -6,8 +6,7 @@ const cors = require('cors');
 const dbConnect = require('./db/connect');
 const errorHandler = require('./middlewares/errorHandler');
 // Config
-// Temporary Test Route
-const ErrorResponse = require('./utils/ErrorResponse');
+
 
 
 dotenv.config();
@@ -21,9 +20,7 @@ app.use(cors());
 app.get('/', (req, res) => {
     res.send('Online Judge API is running...');
 });
-app.get('/error', (req, res, next) => {
-    next(new ErrorResponse('This is a test error!', 400));
-});
+
 
 // Start Server
 const start = async () => {

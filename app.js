@@ -14,6 +14,7 @@ dotenv.config();
 // Middleware
 app.use(express.json());
 app.use(morgan('tiny'));
+app.use('/uploads', express.static('uploads'));
 app.use(cors());
 
 // Basic Route

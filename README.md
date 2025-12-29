@@ -136,7 +136,11 @@ mkdir processing
 
 # ▶️ 5️⃣ Run Services
 
-You need **two terminals**
+-You can use docker directly ,then directly jump to Testing Step 0
+```
+docker compose up --build
+```
+- if you are not using docker then You need **two terminals**
 
 ---
 

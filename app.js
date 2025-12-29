@@ -4,7 +4,11 @@ const cors = require("cors");
 const errorHandler = require("./middlewares/errorHandler")
 const dbConnect = require("./db/connect");
 require("dotenv").config();
+// Inside app.js
+const adminQuestionRoutes = require("./routes/admin/question");
 
+// Mount it
+app.use("/api/admin/questions", adminQuestionRoutes);
 
 app.use(cors({
   origin: "http://127.0.0.1:3030"

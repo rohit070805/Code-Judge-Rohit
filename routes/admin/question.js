@@ -1,33 +1,17 @@
 const express = require("express");
+const router = express.Router();
 const upload = require("../../config/multerUpload");
-const {
-  checkAuthorizationHeaders,
-  authenticateAdmin,
-} = require("../../middlewares/authenticate");
-const {
-  validateRequestBody,
-} = require("../../middlewares/validateRequestBody");
-const {
-  checkAddQuestionRequest,
-  addQuestion,
-} = require("../../controllers/admin/question");
-const router = express.Router({ mergeParams: true });
+const { authenticateAdmin } = require("../../middlewares/authenticate"); // 🟢 Imported
+const { createQuestion } = require("../../controllers/admin/question.js");
 
-router.route("/").post(
-  checkAuthorizationHeaders,
-  validateRequestBody,
-  authenticateAdmin,
-
+router.post(
+  "/create",
+  authenticateAdmin, // 🟢 NOW ENABLED: Only Admins can upload
   upload.fields([
-    { name: "solution_file", maxCount: 1 },
     { name: "input_file", maxCount: 1 },
+    { name: "solution_file", maxCount: 1 }
   ]),
-
-  checkAddQuestionRequest,
-
-  validateRequestBody,
-
-  addQuestion
+  createQuestion
 );
 
 module.exports = router;

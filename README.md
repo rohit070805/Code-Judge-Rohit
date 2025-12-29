@@ -140,21 +140,62 @@ node worker.js
 
 # 🧪 6️⃣ Testing the System
 
-### Run test script:
+
+-Since this is a backend-only project, use Postman to simulate the frontend.
+
+# Step 0: Get Authentication Tokens
+-To perform actions, you need a JWT Token. Since we use Google OAuth, follow these steps:
 ```
-node test-system.js
+For User Token:
+
+Open your browser and visit: http://localhost:5000/api/user/auth
+
+Sign in with your Google account.
+
+The browser will show a JSON response. Copy the token string.
+
+For Admin Token:
+
+Open your browser and visit: http://localhost:5000/api/admin/auth
+
+Sign in with your Google account.
+
+The browser will show a JSON response. Copy the token string.
 ```
-This will:
+# Step 1: Admin - Upload a Question
+```
+Endpoint: POST /api/admin/questions/create
 
-- connect to MongoDB  
-- create a test problem  
-- submit C++ code  
-- push job to Redis  
-- compile & execute  
-- return verdict (e.g. ACCEPTED)
+Auth: Select "Bearer Token" and paste your Admin Token.
 
----
+Body (form-data):
 
+title: "Sum of Two Numbers"
+
+content: "Read two integers and print their sum."
+
+tags: "math,easy"
+
+input_file: [Select a text file containing 10 20]
+
+solution_file: [Select a text file containing 30]
+
+Response: Copies the _id of the created question.
+```
+# Step 2: User - Submit a Solution
+```
+Endpoint: POST /api/user/submission
+
+Auth: Select "Bearer Token" and paste your User Token.
+
+Body (form-data):
+
+question_id: [Paste the ID from Step 1]
+
+submission_file: [Select your C++ file]
+
+Result: The server will return ACCEPTED if your code matches the solution.
+```
 ## 📌 Notes
 
 - MongoDB and Redis must be running

@@ -68,7 +68,7 @@ cd Code-Judge-Rohit
 ### Command
 ```
 npm install
-
+```
 
 
 ---

@@ -1,4 +1,3 @@
-// File: models/Question.js
 const mongoose = require("mongoose");
 
 const QuestionSchema = mongoose.Schema(

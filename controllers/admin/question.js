@@ -1,69 +1,66 @@
-// File: controllers/admin/question.js
-const Question = require("../../models/Question");
-const Admin = require("../../models/Admin");
+const { body } = require("express-validator");
 const ErrorResponse = require("../../utils/ErrorResponse");
 const asyncHandler = require("../../middlewares/asyncHandler");
+const { fileUpload } = require("../../config/firebaseConfig");
+const Question = require("../../models/Question");
+const Admin = require("../../models/Admin");
 
-exports.checkAddQuestionRequest = asyncHandler(async (req, res, next) => {
-    const { title } = req.body;
-    
-    // Check if files are present
-    if (!req.files || !req.files.solution_file || !req.files.input_file) {
-        return next(new ErrorResponse("Both solution and input files are required", 400));
+exports.checkAddQuestionRequest = [
+  body("title")
+    .exists()
+    .withMessage("Question Title is Required")
+    .bail()
+    .custom(async (value, { req }) => {
+      const title_exists = await Question.findOne({ title: value });
+      if (title_exists)
+        throw new ErrorResponse("Question With Title Already Exists");
+      return true;
+    }),
+  body("content").exists().withMessage("Question Content is Required").bail(),
+  body("time_limit").exists().withMessage("Question Time Limit is Required").bail(),
+  body().custom((value, { req }) => {
+    if (!req.files?.solution_file?.length) {
+      throw new ErrorResponse("Solution File is Required");
     }
-
-    // Check unique title
-    const existingQuestion = await Question.findOne({ title });
-    if (existingQuestion) {
-        return next(new ErrorResponse("Question with this title already exists", 400));
+    return true;
+  }),
+  body().custom((value, { req }) => {
+    if (!req.files?.input_file?.length) {
+      throw new ErrorResponse("Input File is Required");
     }
+    return true;
+  }),
+];
 
-    next();
-});
+exports.addQuestion = asyncHandler(async (req, res) => {
+  const admin_id = req.auth_user.static_id;
+  const { title, content, time_limit } = req.body;
+  const solution_file = req.files.solution_file[0];
+  const input_file = req.files.input_file[0];
 
-exports.addQuestion = asyncHandler(async (req, res, next) => {
-    const { title, content, time_limit } = req.body;
+  const solution_file_title = title.split(" ").join("_") + "_sol" + ".txt";
+  const solution_file_url = fileUpload(solution_file, solution_file_title);
+  const input_file_title = title.split(" ").join("_") + "_in" + ".txt";
+  const input_file_url = fileUpload(input_file, input_file_title);
 
-    // Save local file paths
-    // We replace backslashes (\) with forward slashes (/) to avoid Windows path issues
-    const solutionPath = req.files.solution_file[0].path.replace(/\\/g, "/");
-    const inputPath = req.files.input_file[0].path.replace(/\\/g, "/");
+  const question = await Question.create({
+    title: title,
+    content: content,
+    solution_file: solution_file_url,
+    input_file: input_file_url,
+    time_limit: time_limit
+  });
 
-    // Create Question in DB
-    const question = await Question.create({
-        title,
-        content,
-        time_limit,
-        solution_file: solutionPath,
-        input_file: inputPath
-    });
-
-    // Link Question to the Admin who created it
-    await Admin.findByIdAndUpdate(req.auth_user._id, {
-        $push: { questions_created: { question_id: question._id } }
-    });
-
-    res.status(201).json({
-        success: true,
-        message: "Question Added Successfully",
-        data: question
-    });
-});
-exports.deleteQuestion = asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-
-    const question = await Question.findById(id);
-
-    if (!question) {
-        return next(new ErrorResponse("Question not found", 404));
+  await Admin.findOneAndUpdate(
+    {
+      _id: admin_id,
+    },
+    {
+      $push: {
+        questions_created: { question_id: question._id },
+      },
     }
+  );
 
-    // Optional: You could add logic here to delete the files from the 'uploads' folder too
-    
-    await Question.findByIdAndDelete(id);
-
-    res.status(200).json({
-        success: true,
-        message: "Question deleted successfully"
-    });
+  return res.json({ message: "Question Added Successfully" });
 });

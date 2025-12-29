@@ -1,17 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const userAuthRoutes = require('./user/auth');
-const adminAuthRoutes = require('./admin/auth');
-const adminQuestionRoutes = require('./admin/question');
-const userQuestionRoutes = require('./user/question');
-const userSubmissionRoutes = require('./user/submission'); // 1. Import this
-
-// Mount Routes
-router.use('/user/auth', userAuthRoutes);
-router.use('/admin/auth', adminAuthRoutes);
-router.use('/admin/question', adminQuestionRoutes);
-router.use('/user/question', userQuestionRoutes);
-router.use('/user/submission', userSubmissionRoutes); // 2. Add this
+router.use('/admin', require('./admin'));
+router.use('/user', require('./user'));
 
 module.exports = router;

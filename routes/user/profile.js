@@ -7,24 +7,26 @@ const {
   validateRequestBody,
   checkMongoId,
 } = require("../../middlewares/validateRequestBody");
-const {
-  submitFile,
-  checkSubmitRequest,
-} = require("../../controllers/user/submission");
-const upload = require("../../config/multerUpload");
+const { getUserProfile, checkChangeHandleRequest, changeHandle, getAllUsers } = require("../../controllers/user/profile");
+
 const router = express.Router({ mergeParams: true });
 
-router.route("/").post(
+router.route("/handle/:handle").get(
+  getUserProfile
+);
+
+router.route("/all").get(
+  getAllUsers
+);
+
+router.route("/handle").patch(
   checkAuthorizationHeaders,
   validateRequestBody,
   authenticateUser,
-
-  upload.fields([{ name: "submission_file", maxCount: 1 }]),
-
-  checkSubmitRequest,
+  checkChangeHandleRequest,
   validateRequestBody,
 
-  submitFile
+  changeHandle
 );
 
 module.exports = router;

@@ -321,10 +321,20 @@ int main() {
 - Do not upload `.env` to GitHub
 
 ---
+## 🐳 Docker Setup (Optional)
+Instead of running services manually, you can spin up the entire ecosystem (Mongo, Redis, API, Worker) with one command.
 
+1.  **Install Docker Desktop.**
+2.  **Run:**
+    ```bash
+    docker-compose up --build
+    ```
+3.  **Access:** The API is now running at `http://localhost:5000`.
+    * *Note: Code execution happens inside the Linux container, ensuring a consistent environment.*
+    
 ## 🚀 Future Plans
 
-- Docker support  
+ 
 - Multi-language support  
 - Admin dashboard UI  
 

@@ -1,22 +1,24 @@
 const express = require("express");
 const { checkAuthorizationHeaders, authenticateUser } = require("../../middlewares/authenticate");
 const { validateRequestBody } = require("../../middlewares/validateRequestBody");
-const { submitFile, checkSubmitRequest } = require("../../controllers/user/submission");
+const { submitFile, checkSubmitRequest, getSubmissionHistory } = require("../../controllers/user/submission"); // 🟢 Imported new function
 const upload = require("../../config/multerUpload");
 const router = express.Router({ mergeParams: true });
 
-router.route("/").post(
+// Route: /api/user/submission
+
+// 1. POST: Submit a new solution
+router.post(
+  "/",
   checkAuthorizationHeaders,
   validateRequestBody,
   authenticateUser,
-
-  // 1. Upload the file first
   upload.fields([{ name: "submission_file", maxCount: 1 }]),
-
-  // 2. FIX: Manually tell the validator the file exists
+  
+  // Middleware to handle file validation trick
   (req, res, next) => {
     if (req.files && req.files.submission_file) {
-      req.body.submission_file = "attached"; // Dummy text to pass validation
+      req.body.submission_file = "attached";
     }
     next();
   },
@@ -24,6 +26,14 @@ router.route("/").post(
   checkSubmitRequest,
   validateRequestBody,
   submitFile
+);
+
+// 2. GET: View Submission History (New)
+router.get(
+  "/history",
+  checkAuthorizationHeaders,
+  authenticateUser, // User must be logged in
+  getSubmissionHistory
 );
 
 module.exports = router;

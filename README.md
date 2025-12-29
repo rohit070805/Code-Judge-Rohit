@@ -196,6 +196,65 @@ submission_file: [Select your C++ file]
 
 Result: The server will return ACCEPTED if your code matches the solution.
 ```
+Step 0: Get Authentication Tokens
+To perform actions, you need a JWT Token. Since we use Google OAuth, follow these steps:
+
+User Token: Visit http://localhost:5000/api/user/auth -> Sign In -> Copy Token.
+
+Admin Token: Visit http://localhost:5000/api/admin/auth -> Sign In -> Copy Token.
+
+Step 1: Admin - Upload a Question
+Endpoint: POST /api/admin/questions/create
+
+Auth: Bearer Token (Admin Token)
+
+Body (form-data):
+
+title: "Sum of Two Numbers"
+
+input_file: [Select file with 10 20]
+
+solution_file: [Select file with 30]
+
+Response: Copies the _id of the created question.
+
+Step 2: User - Submit a Solution
+Endpoint: POST /api/user/submission
+
+Auth: Bearer Token (User Token)
+
+Body (form-data):
+
+question_id: [Paste ID from Step 1]
+
+submission_file: [Select C++ file]
+
+Result: Returns ACCEPTED / WRONG ANSWER.
+
+# Step 3: User - View Submission History
+```
+Endpoint: GET /api/user/submission/history
+
+Auth: Bearer Token (User Token)
+```
+# ⚡ Advanced: Experiencing the Redis Queue
+```
+By default, the API waits for the code to execute before responding (Synchronous). To demonstrate the power of the Non-Blocking Queue:
+
+Modify Code: Open controllers/user/submission.js.
+
+Uncomment the "Artificial Delay" block (sleep for 5s) inside the Worker i.e submissionqueue.process .
+
+Uncomment the function submitFile as mentioned there
+
+Run Test: Send lot of  submission via Postman.
+
+Observation:
+
+Postman: Returns "Submission Queued" instantly (milliseconds).
+
+Terminal: Shows 🚧 WORKER: Starting Job... and waits 5 seconds before finishing.
+```
 ## 📌 Notes
 
 - MongoDB and Redis must be running
